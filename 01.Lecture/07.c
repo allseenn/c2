@@ -21,12 +21,12 @@ int main()
 {
     printf("%i\n", sizeof(date));
 
-    f.value = -4.0;
+    f.value = -4.1;
     printf("Memory size is %lu\n", sizeof(f));
     printf("f.value = %f\n", f.value );
-    printf("sign = %x\n", f.bit.sign);
-    printf("exp = %x\n", f.bit.exp);
-    printf("mantissa = %x\n", f.bit.mant);
+    printf("sign = %d\n", f.bit.sign);
+    printf("exp = %d\n", f.bit.exp);
+    printf("mantissa = %d\n", f.bit.mant);
 
     return 0;
 }
