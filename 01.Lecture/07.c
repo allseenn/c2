@@ -27,6 +27,9 @@ int main()
     printf("sign = %d\n", f.bit.sign);
     printf("exp = %d\n", f.bit.exp);
     printf("mantissa = %d\n", f.bit.mant);
-
+    // (-1)^sign * 1.mantissa * 2^(exp - bias)
+    float restore = ldexpf((float)f.bit.mant / (1 << 23), f.bit.exp - 129);
+    if (f.bit.sign) restore = -restore;
+    printf("%f\n", restore);
     return 0;
 }
