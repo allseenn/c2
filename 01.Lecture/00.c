@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include<stdint.h>
 #include<inttypes.h>
+#ifdef _WIN32
+#include <windows.h>
+SetConsoleOutputCP(1251);
+#endif
 
 void printBits(x)
 {
