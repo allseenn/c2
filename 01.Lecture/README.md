@@ -1,6 +1,6 @@
-# Побитовые операции, поля и структуры
+# Bitwise, структуры и библиотеки
 
-## Битовые операции
+## Битовые операции (Bitwise ops)
 
 ### Одноместные
 
@@ -274,3 +274,215 @@ char name[20]; // то же самое int a[10], b[10], c[10][5];
 #define float double; typedef double float;
 float f = 1.23;
 ```
+
+## Библиотеки
+
+Библиотеки могут существовать в двух вариациях:
+- статические: код из библиотеки добавляется в исполняемый файл на стадии линковки, и после её окончания файл библиотеки больше не нужен полученной программе
+- динамические: код из библиотеки не добавляется в исполняемый файл, а загружается в память во время запуска программы. Таким образом, он должен быть доступен при каждом запуске
+
+Стандартные библиотеки С, которые рассмотрим:
+
+1. locale.h — библиотека локализации
+2. time.h — библиотека для работы со временем
+3. ncurses.h — библиотека для вывода тестовой информации на терминал
+4. stdio.h — библиотека ввода/вывода
+5. string.h — библиотека для работы со строками
+6. assert.h — библиотека для вывода диагностической информации
+
+### 1. locale.h
+
+- setlocale(int category, const char* locale) - Функция установки локали
+
+- **wchar_t** занимает 4 байта и хранится в памяти в виде целого числа (код символа), в порядке big-endian.
+
+```
+#include <stdio.h>
+#include <locale.h> //setlocale()
+#include <wchar.h> //«широкие» символы
+
+int main()
+{
+    setlocale(LC_ALL,"en_US.UTF-8");
+    wchar_t str1[] = L"Привет";
+    printf("str1 = %S\n", str1);
+    printf("sizeof str1 = %lu\n", sizeof(str1)); // размер 28 байт
+    char str2[] = "Привет";
+    printf("str2 = %s\n",str2);
+    printf("sizeof str2 = %lu\n", sizeof(str2)); // размер 13 байт
+    char str3[] = "Hello!";                     // размер 7 байт
+    printf("str3 = %s\n",str3);
+    printf("sizeof str3 = %lu\n", sizeof(str3));
+    return 0;
+}
+```
+
+#### UTF-8
+
+UTF-8 разработан для обратной совместимости с ASCII: первые 128 символов Unicode, которые взаимно-однозначно соответствуют ASCII, кодируются с использованием одного байта с тем же двоичным значением, что и ASCII. Поэтому действительный текст ASCII является действительным UTF-8. — кодированным Unicode.
+
+Символы с более низкими числовыми значениями, которые, как правило, встречаются чаще, кодируются с
+использованием меньшего количества байтов (1). Символы с более высокими числовыми значениями, которые
+встречаются реже, кодируются с использованием большего количества байтов (4).
+
+```
+uint8_t ch[] = {0xd0,0x90,0xd0,0x91}; // "АБ"
+uint32_t ch32[] = {0x91d090d0,0}; // "АБ"
+printf("%x %x %x %x = %s\n",ch[0],ch[1],ch[2],ch[3],ch);
+printf("%x = %s\n",ch32[0], ch32);
+```
+
+Чтобы декодировать UTF-8, нужно посмотреть первые (самые старшие) 2 бита каждого байта. Если они «01» или «00», — это 8-битный символьный код, если они «11», — это первый байт многобайтовой последовательности. Если они равны «10», то это один байт внутри многобайтовой последовательности. В следующем примере проверяем первый байт UTF-8 символа: он показывает, сколько всего байт в символе.
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+    int numberOfBytesInChar(unsigned char val) {
+    if (val < 128) {
+        return 1;
+    } else if (val < 224) {
+        return 2;
+    } else if (val < 240) {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+int utf8strlen(char *s) {
+    char *tmp = s;
+    int len = 0;
+    while( *tmp ) {
+    tmp += numberOfBytesInChar(*tmp);
+    len++;
+    // len += (*tmp++ & 0xC0) != 0x80;
+    // *tmp++ & 0xC0 проверяем шаблон 11xxxxxx
+    // !=0x80 не является 10xxxxxx
+    //или внутренним байтом UTF-8 символа
+    }
+    return len;
+}
+
+int main(){
+    char s[] = "Hello world";
+    char s2[] = "Привет Мир";
+    printf("strlen(s2) = %lu\n",strlen(s2));
+    printf("utf8strlen(s) = %d\n",utf8strlen(s));
+    printf("utf8strlen(s2) = %d\n",utf8strlen(s2));
+    return 0;
+}
+```
+
+Еще один вариант. Анализируем все байты кроме тех, которые являются внутренними байтами UTF-8 символа. Такие байты удовлетворяют маске 0b10xxxxxx, их необходимо пропускать при подсчете длины.
+
+```
+#include <stdio.h>
+
+size_t strlenutf8(char *s)
+{
+    size_t length = 0;
+    while (*s)
+    {
+        if ((*s & 0b11000000) != 0b10000000)
+        {
+            ++length;
+        }
+        ++s;
+    }
+    return length;
+}
+
+int main()
+{
+    char s[] = "Привет";
+    char s2[] = "Hello";
+    printf("len s = %zu\n", strlenutf8(s));
+    printf("len s2 = %zu\n",
+           strlenutf8(s2));
+    return 0;
+}
+```
+
+### 2. time.h
+
+Возврат текущего времени, в структуре типа time_t:
+
+```
+time_t mytime = time(NULL);
+```
+
+Извлечение даты и времени из структуры типа time_t:
+
+```
+struct tm* now = localtime(&mytime);
+printf("%02d:%02d:%02d\n", now->tm_hour, now->tm_min, now->tm_sec);
+```
+
+Код вывода в консоль текущей даты и времени:
+
+```
+#include <stdio.h>
+#include <time.h>
+
+int main(void)
+{
+    time_t mytime = time(NULL);
+    struct tm *now = localtime(&mytime);
+    printf("Date: %d.%d.%d\n", now->tm_mday,
+           now->tm_mon + 1, now->tm_year + 1900);
+    printf("Time: %d:%d:%d\n", now->tm_hour,
+           now->tm_min, now->tm_sec);
+    return 0;
+}
+```
+
+Замер скорости выполнения программы с точностью до микросекунд:
+
+```
+double DELAY = 3;
+clock_t begin = clock();
+while((double)(clock() - begin)/CLOCKS_PER_SEC<DELAY)
+    {/*printf("%4d\n",clock());*/ }
+printf("Hello World %ld",CLOCKS_PER_SEC);
+```
+
+### 3. ncurses.h
+
+Предоставляет функции для перемещения курсора, создания окон, создания цветов, игры с мышью и т. д.
+
+Для работы библиотеки нужно установить зависимости:
+
+- Windows https://pdcurses.org/, запустить файл mingw32-make для сборки в каталоге \wincon
+- Linux ```sudo apt-get install libncursesw5-dev```
+
+```
+#include <ncurses.h>
+int main()
+{
+    int ch;
+    initscr(); // Начать curses mode
+    raw();
+    // Отключаем buffering. Ctrl+C не завершит программу
+    noecho(); // Отключаем echo() режим пока считываем символы
+    getch();
+    printw("Type text: \n");
+    while ((ch = getch()) != '.')
+    {
+        printw("%c", ch);
+    }
+    // refresh(); // Печатаем это на экран
+    getch();
+    // Ждем пока пользователь нажмет клавишу
+    endwin(); // Завершить curses mode
+    return 0;
+}
+```
+
+Для компиляции программы нужно включить `-lncurses`:
+
+```
+gcc -o prog 18.c -lncurses
+```
+
