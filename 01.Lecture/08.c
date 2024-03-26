@@ -23,16 +23,26 @@ int main(int argc, char const *argv[])
 
     int ar[5] = {1,2,3,4,5};
     int* pa; // указательная переменная
-    pa = &ar[0]; // аналогично pa = &ar указатель на начало массива
+    pa = &ar[0]; // или pa = ar указатель на начало массива
     printf("Значение ячейки памяти куда ссылается указатель на массив pa %i\n", *pa);
+    printf("Значение ячейки памяти куда ссылается имя массива pa %i\n", *ar);
 
-
+    int str_address = 0;
     int str[3][5] = {{1,2,3,4,5},{6,7,8,9,10},{11,12,13,14,15}};
     int (*ps)[5];
-    ps = str+1;
-    printf("Строка № 1 %s\n", ps);
-    
-    char* string = "Hello World";
-    printf("%s\n", string);
+    ps = str+str_address;
+    printf("адрес строки № %i = %p\n", str_address, ps);
+    printf("значение строки № %i = %i\n", str_address, **ps);
+
+    char string1[] = "Hello, World";
+    char* string2 = "Goodbye, nonsense";
+    int* ps1;
+    ps1 = string1;
+    int* ps2;
+    ps2 = string2;
+    printf("%s\n", ps1);
+    printf("%s\n", ps2);
     return 0;
+
+    
 }

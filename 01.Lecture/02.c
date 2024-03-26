@@ -4,9 +4,9 @@ int main()
 {
     uint8_t x=0xf5;// 1111 0101
     printf("x = 0x%"PRIX8" = ", x);
-    printBits(x); printf("\n");
+    printBits(x);
     x>>=1;
     printf("x = 0x%"PRIX8" = ", x);
-    printBits(x); printf("\n");
+    printBits(x);
     return 0;
 }

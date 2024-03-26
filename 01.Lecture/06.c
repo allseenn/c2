@@ -13,27 +13,27 @@ int main(int argc, char const *argv[])
 
     c = a & b; 
     printf("Line 1 c = %"TYPE"\t", c ); /* 12 = 0000 1100 */
-    printBits(c); printf("\n");
+    printBits(c);
 
     c = a | b;
     printf("Line 2 c = %"TYPE"\t", c ); /* 61 = 0011 1101 */
-    printBits(c); printf("\n");
+    printBits(c); 
 
     c = a ^ b;
     printf("Line 3 c = %"TYPE"\t", c ); /* 49 = 0011 0001 */
-    printBits(c); printf("\n");
+    printBits(c); 
 
     c = ~a;
     printf("Line 4 c = %"TYPE"\t", c );  /*-61 = 1100 0011 */
-    printBits(c); printf("\n");
+    printBits(c); 
 
     c = a << 2;
     printf("Line 5 c = %"TYPE"\t", c ); /* 240 = 1111 0000 */
-    printBits(c); printf("\n");
+    printBits(c); 
 
     c = a >> 2;
     printf("Line 6 c = %"TYPE"\t", c ); /* 15 = 0000 1111 */
-    printBits(c); printf("\n");
+    printBits(c); 
 
     return 0;
 }

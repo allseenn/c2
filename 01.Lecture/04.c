@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <inttypes.h>
+#include "00.c"
 
 int main()
 {
